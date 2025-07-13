@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "10058838350",
+    "project_id": "lista-compras-firebase-21837",
+    "storage_bucket": "lista-compras-firebase-21837.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:10058838350:android:a459c0f6488dc444c6ee1f",
+        "android_client_info": {
+          "package_name": "leankar.dev.flutter_lista_compras_firebase"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBRlUNHSIG5ceAP36phgN2ijcs4a7v6VP0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
