@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../../firestore/models/listin.dart';
@@ -21,6 +23,8 @@ class _ProdutoScreenState extends State<ProdutoScreen> {
   List<Produto> listaProdutosPegos = [
     Produto(id: "UUID", name: "Laranja", amount: 5, price: 1, isComprado: true),
   ];
+
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
 
   @override
   Widget build(BuildContext context) {
@@ -58,7 +62,13 @@ class _ProdutoScreenState extends State<ProdutoScreen> {
           Column(
             children: List.generate(listaProdutosPlanejados.length, (index) {
               Produto produto = listaProdutosPlanejados[index];
-              return ListTileProduto(produto: produto, isComprado: false);
+              return ListTileProduto(
+                produto: produto,
+                isComprado: false,
+                showModal: () {
+                  showFormModal;
+                },
+              );
             }),
           ),
           const Padding(
@@ -73,7 +83,13 @@ class _ProdutoScreenState extends State<ProdutoScreen> {
           Column(
             children: List.generate(listaProdutosPegos.length, (index) {
               Produto produto = listaProdutosPegos[index];
-              return ListTileProduto(produto: produto, isComprado: true);
+              return ListTileProduto(
+                produto: produto,
+                isComprado: true,
+                showModal: () {
+                  showFormModal;
+                },
+              );
             }),
           ),
         ],
@@ -193,7 +209,13 @@ class _ProdutoScreenState extends State<ProdutoScreen> {
                         produto.price = double.parse(priceController.text);
                       }
 
-                      // TODO: Salvar no Firestore
+                      //  Salvar no Firestore
+                      firestore
+                          .collection('listins')
+                          .doc(widget.listin.id)
+                          .collection('produtos')
+                          .doc(produto.id)
+                          .set(produto.toMap());
 
                       // Atualizar a lista
                       refresh();
