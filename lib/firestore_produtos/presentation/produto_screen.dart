@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../../firestore/models/listin.dart';
@@ -15,16 +14,17 @@ class ProdutoScreen extends StatefulWidget {
 }
 
 class _ProdutoScreenState extends State<ProdutoScreen> {
-  List<Produto> listaProdutosPlanejados = [
-    Produto(id: "ADASD", name: "Maçã", isComprado: false),
-    Produto(id: "UUID", name: "Pêra", isComprado: false),
-  ];
+  List<Produto> listaProdutosPlanejados = [];
 
-  List<Produto> listaProdutosPegos = [
-    Produto(id: "UUID", name: "Laranja", amount: 5, price: 1, isComprado: true),
-  ];
+  List<Produto> listaProdutosPegos = [];
 
   FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+  @override
+  void initState() {
+    refresh();
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,63 +36,68 @@ class _ProdutoScreenState extends State<ProdutoScreen> {
         },
         child: const Icon(Icons.add),
       ),
-      body: ListView(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(vertical: 16.0),
-            child: Column(
-              children: const [
-                Text("R\$${0}", style: TextStyle(fontSize: 42)),
-                Text(
-                  "total previsto para essa compra",
-                  style: TextStyle(fontStyle: FontStyle.italic),
-                ),
-              ],
+      body: RefreshIndicator(
+        onRefresh: () {
+          return refresh();
+        },
+        child: ListView(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: Column(
+                children: const [
+                  Text("R\$${0}", style: TextStyle(fontSize: 42)),
+                  Text(
+                    "total previsto para essa compra",
+                    style: TextStyle(fontStyle: FontStyle.italic),
+                  ),
+                ],
+              ),
             ),
-          ),
-          const Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Divider(thickness: 2),
-          ),
-          const Text(
-            "Produtos Planejados",
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          Column(
-            children: List.generate(listaProdutosPlanejados.length, (index) {
-              Produto produto = listaProdutosPlanejados[index];
-              return ListTileProduto(
-                produto: produto,
-                isComprado: false,
-                showModal: () {
-                  showFormModal;
-                },
-              );
-            }),
-          ),
-          const Padding(
-            padding: EdgeInsets.all(8.0),
-            child: Divider(thickness: 2),
-          ),
-          const Text(
-            "Produtos Comprados",
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-          ),
-          Column(
-            children: List.generate(listaProdutosPegos.length, (index) {
-              Produto produto = listaProdutosPegos[index];
-              return ListTileProduto(
-                produto: produto,
-                isComprado: true,
-                showModal: () {
-                  showFormModal;
-                },
-              );
-            }),
-          ),
-        ],
+            const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Divider(thickness: 2),
+            ),
+            const Text(
+              "Produtos Planejados",
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            Column(
+              children: List.generate(listaProdutosPlanejados.length, (index) {
+                Produto produto = listaProdutosPlanejados[index];
+                return ListTileProduto(
+                  produto: produto,
+                  isComprado: false,
+                  showModal: (Produto produto) {
+                    showFormModal(model: produto);
+                  },
+                );
+              }),
+            ),
+            const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Divider(thickness: 2),
+            ),
+            const Text(
+              "Produtos Comprados",
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            Column(
+              children: List.generate(listaProdutosPegos.length, (index) {
+                Produto produto = listaProdutosPegos[index];
+                return ListTileProduto(
+                  produto: produto,
+                  isComprado: true,
+                  showModal: (Produto produto) {
+                    showFormModal(model: produto);
+                  },
+                );
+              }),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -234,5 +239,24 @@ class _ProdutoScreenState extends State<ProdutoScreen> {
     );
   }
 
-  refresh() {}
+  refresh() async {
+    List<Produto> temp = [];
+
+    QuerySnapshot<Map<String, dynamic>> snapshot = await firestore
+        .collection('listins')
+        .doc(widget.listin.id)
+        .collection('produtos')
+        .get();
+
+    for (var doc in snapshot.docs) {
+      Produto produto = Produto.fromMap(doc.data());
+      temp.add(produto);
+    }
+
+    setState(() {
+      listaProdutosPlanejados = temp;
+      // listaProdutosPlanejados = temp.where((p) => !p.isComprado).toList();
+      // listaProdutosPegos = temp.where((p) => p.isComprado).toList();
+    });
+  }
 }

@@ -17,7 +17,7 @@ class ListTileProduto extends StatelessWidget {
   Widget build(BuildContext context) {
     return ListTile(
       onTap: () {
-        showModal(model: produto);
+        showModal(produto);
       },
       leading: Icon((isComprado) ? Icons.shopping_basket : Icons.check),
       title: Text(
